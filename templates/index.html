@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Username Availability Checker</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+            body {
+                font-family: 'Roboto', sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                background-color: #e9f1fb;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                text-align: center;
+            }
+            h1 {
+                font-size: 3rem;
+                margin-bottom: 20px;
+                color: #4a90e2;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+            p {
+                font-size: 1.2rem;
+                margin-bottom: 30px;
+                color: #666;
+            }
+            #username-form {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 30px;
+                justify-content: center;
+                align-items: center;
+            }
+            input[type='text'] {
+                width: 300px;
+                padding: 15px;
+                font-size: 1.1rem;
+                border: 1px solid #ccc;
+                border-radius: 25px;
+                outline: none;
+                transition: border-color 0.3s ease;
+            }
+            input[type='text']:focus {
+                border-color: #4a90e2;
+            }
+            button {
+                padding: 12px 25px;
+                font-size: 1.1rem;
+                color: white;
+                background-color: #4a90e2;
+                border: none;
+                border-radius: 25px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            button:hover {
+                background-color: #357ab7;
+            }
+            #username-display {
+                font-size: 1.3rem;
+                margin-bottom: 20px;
+                color: #444;
+            }
+            svg {
+                background-color: white;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                border-radius: 10px;
+                padding: 20px;
+                margin-top: 20px;
+                margin-bottom: 100px;
+            }
+            .bar {
+                fill: #4a90e2;
+                transition: fill 0.3s ease, height 0.5s ease;
+            }
+            .bar.available {
+                fill: #2ecc71;
+            }
+            .bar.taken {
+                fill: #e74c3c;
+            }
+            .bar.unexpected {
+                fill: #f39c12;
+            }
+            .label {
+                font-size: 14px;
+                fill: white;
+                font-weight: bold;
+                text-anchor: middle;
+            }
+            .axis text {
+                font-size: 14px;
+                fill: #333;
+            }
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 2rem;
+                }
+                input[type='text'] {
+                    width: 80%;
+                    padding: 10px;
+                }
+                button {
+                    padding: 10px 20px;
+                }
+                svg {
+                    width: 90%;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Username Availability Checker</h1>
+        <p>Check the availability of a username across twenty popular platforms.</p>
+        <form id="username-form">
+            <input type="text" id="username" name="username" placeholder="Enter username" required />
+            <button type="submit">Check</button>
+        </form>
+        <p id="username-display"></p>
+        <svg width="1500" height="500"></svg>
+        <script src="https://d3js.org/d3.v6.min.js"></script>
+        <script>
+            document.getElementById('username-form').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const username = document.getElementById('username').value;
+
+                fetch('/check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        username: username,
+                    }),
+                })
+                    .then((response) => response.json())
+                    .then((jsonData) => {
+                        if (jsonData.error) {
+                            console.error('Error:', jsonData.error);
+                            alert('Error: ' + jsonData.error);
+                            return;
+                        }
+
+                        const username = jsonData.username;
+                        const results = jsonData.results;
+
+                        document.getElementById('username-display').textContent = `Results for "${username}"`;
+
+                        const svg = d3.select('svg');
+                        const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+                        const width = +svg.attr('width') - margin.left - margin.right;
+                        const height = +svg.attr('height') - margin.top - margin.bottom;
+                        const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+                        const x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+                        const y = d3.scaleLinear().rangeRound([height, 0]);
+
+                        function updateChart(data) {
+                            x.domain(data.map((d) => d.site));
+                            y.domain([0, 1]);
+
+                            g.selectAll('.bar').remove();
+                            g.selectAll('.label').remove();
+                            g.selectAll('.axis').remove();
+
+                            g.append('g').attr('class', 'axis axis--x').attr('transform', `translate(0,${height})`).call(d3.axisBottom(x));
+
+                            g.selectAll('.bar')
+                                .data(data)
+                                .enter()
+                                .append('rect')
+                                .attr('class', (d) => `bar ${d.status}`)
+                                .attr('x', (d) => x(d.site))
+                                .attr('y', (d) => y(1))
+                                .attr('width', x.bandwidth())
+                                .attr('height', (d) => height - y(1))
+                                .transition()
+                                .duration(1000)
+                                .attr('y', (d) => y(d.value))
+                                .attr('height', (d) => height - y(d.value));
+
+                            g.selectAll('.label')
+                                .data(data)
+                                .enter()
+                                .append('text')
+                                .attr('class', 'label')
+                                .attr('x', (d) => x(d.site) + x.bandwidth() / 2)
+                                .attr('y', (d) => y(d.value) + 20)
+                                .text((d) => d.status)
+                                .attr('text-anchor', 'middle')
+                                .style('cursor', (d) => (d.status === 'taken' ? 'pointer' : 'default'))
+                                .on('click', function (event, d) {
+                                    if (d.status === 'taken' && d.url) {
+                                        window.open(d.url, '_blank');
+                                    }
+                                });
+                        }
+
+                        const formattedData = Object.keys(results).map((site) => ({
+                            site,
+                            status: results[site].status,
+                            url: results[site].url,
+                            value: 1,
+                        }));
+
+                        updateChart(formattedData);
+                    })
+                    .catch((error) => console.error('Error fetching JSON:', error));
+            });
+        </script>
+    </body>
+</html>
