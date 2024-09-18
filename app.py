@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import requests
 import json
 import logging
@@ -33,7 +33,7 @@ websites = {
 
 def check_username(username):
     results = {}
-    
+
     for site, url_pattern in websites.items():
         url = url_pattern.format(username=username)
         try:
@@ -46,7 +46,7 @@ def check_username(username):
                 results[site] = {'status': 'unsure', 'url': None}
         except requests.exceptions.RequestException as e:
             results[site] = {'status': f'error: {e}', 'url': None}
-    
+
     return {'username': username, 'results': results}
 
 @app.route('/')
@@ -59,15 +59,26 @@ def check():
         username = request.form['username']
         logging.debug(f'Checking username: {username}')
         results = check_username(username)
-        
+
         os.makedirs('static', exist_ok=True)
-        
         with open('static/username_availability.json', 'w') as json_file:
             json.dump(results, json_file, indent=4)
-        
+
         return jsonify(results)
     except Exception as e:
         logging.error('Error checking username:', exc_info=e)
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/saved-data', methods=['GET'])
+def saved_data():
+    try:
+        json_path = os.path.join('static', 'username_availability.json')
+        if os.path.exists(json_path):
+            return send_from_directory('static', 'username_availability.json')
+        else:
+            return jsonify({'error': 'No saved data found'}), 404
+    except Exception as e:
+        logging.error('Error fetching saved data:', exc_info=e)
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":

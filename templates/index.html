@@ -127,6 +127,90 @@
         <svg width="1500" height="500"></svg>
         <script src="https://d3js.org/d3.v6.min.js"></script>
         <script>
+            // Function to update the chart
+            function updateChart(data) {
+                const svg = d3.select('svg');
+                const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+                const width = +svg.attr('width') - margin.left - margin.right;
+                const height = +svg.attr('height') - margin.top - margin.bottom;
+                const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+                const x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+                const y = d3.scaleLinear().rangeRound([height, 0]);
+
+                x.domain(data.map((d) => d.site));
+                y.domain([0, 1]);
+
+                g.selectAll('.bar').remove();
+                g.selectAll('.label').remove();
+                g.selectAll('.axis').remove();
+
+                g.append('g').attr('class', 'axis axis--x').attr('transform', `translate(0,${height})`).call(d3.axisBottom(x));
+
+                g.selectAll('.bar')
+                    .data(data)
+                    .enter()
+                    .append('rect')
+                    .attr('class', (d) => `bar ${d.status}`)
+                    .attr('x', (d) => x(d.site))
+                    .attr('y', (d) => y(1))
+                    .attr('width', x.bandwidth())
+                    .attr('height', (d) => height - y(1))
+                    .transition()
+                    .duration(1000)
+                    .attr('y', (d) => y(d.value))
+                    .attr('height', (d) => height - y(d.value));
+
+                g.selectAll('.label')
+                    .data(data)
+                    .enter()
+                    .append('text')
+                    .attr('class', 'label')
+                    .attr('x', (d) => x(d.site) + x.bandwidth() / 2)
+                    .attr('y', (d) => y(d.value) + 20)
+                    .text((d) => d.status)
+                    .attr('text-anchor', 'middle')
+                    .style('cursor', (d) => (d.status === 'taken' ? 'pointer' : 'default'))
+                    .on('click', function (event, d) {
+                        if (d.status === 'taken' && d.url) {
+                            window.open(d.url, '_blank');
+                        }
+                    });
+            }
+
+            // Function to load the JSON file if available
+            function loadSavedData() {
+                fetch('/saved-data') // Endpoint to fetch saved JSON data
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('No saved data found.');
+                        }
+                        return response.json();
+                    })
+                    .then((jsonData) => {
+                        const username = jsonData.username;
+                        const results = jsonData.results;
+
+                        document.getElementById('username-display').textContent = `Results for "${username}"`;
+
+                        const formattedData = Object.keys(results).map((site) => ({
+                            site,
+                            status: results[site].status,
+                            url: results[site].url,
+                            value: 1,
+                        }));
+
+                        updateChart(formattedData);
+                    })
+                    .catch((error) => {
+                        console.log('No saved data found:', error);
+                    });
+            }
+
+            // Load saved data on page load
+            window.addEventListener('load', loadSavedData);
+
+            // Handle form submission for checking username availability
             document.getElementById('username-form').addEventListener('submit', function (event) {
                 event.preventDefault();
                 const username = document.getElementById('username').value;
@@ -152,56 +236,6 @@
                         const results = jsonData.results;
 
                         document.getElementById('username-display').textContent = `Results for "${username}"`;
-
-                        const svg = d3.select('svg');
-                        const margin = { top: 20, right: 30, bottom: 40, left: 40 };
-                        const width = +svg.attr('width') - margin.left - margin.right;
-                        const height = +svg.attr('height') - margin.top - margin.bottom;
-                        const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
-
-                        const x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
-                        const y = d3.scaleLinear().rangeRound([height, 0]);
-
-                        function updateChart(data) {
-                            x.domain(data.map((d) => d.site));
-                            y.domain([0, 1]);
-
-                            g.selectAll('.bar').remove();
-                            g.selectAll('.label').remove();
-                            g.selectAll('.axis').remove();
-
-                            g.append('g').attr('class', 'axis axis--x').attr('transform', `translate(0,${height})`).call(d3.axisBottom(x));
-
-                            g.selectAll('.bar')
-                                .data(data)
-                                .enter()
-                                .append('rect')
-                                .attr('class', (d) => `bar ${d.status}`)
-                                .attr('x', (d) => x(d.site))
-                                .attr('y', (d) => y(1))
-                                .attr('width', x.bandwidth())
-                                .attr('height', (d) => height - y(1))
-                                .transition()
-                                .duration(1000)
-                                .attr('y', (d) => y(d.value))
-                                .attr('height', (d) => height - y(d.value));
-
-                            g.selectAll('.label')
-                                .data(data)
-                                .enter()
-                                .append('text')
-                                .attr('class', 'label')
-                                .attr('x', (d) => x(d.site) + x.bandwidth() / 2)
-                                .attr('y', (d) => y(d.value) + 20)
-                                .text((d) => d.status)
-                                .attr('text-anchor', 'middle')
-                                .style('cursor', (d) => (d.status === 'taken' ? 'pointer' : 'default'))
-                                .on('click', function (event, d) {
-                                    if (d.status === 'taken' && d.url) {
-                                        window.open(d.url, '_blank');
-                                    }
-                                });
-                        }
 
                         const formattedData = Object.keys(results).map((site) => ({
                             site,
