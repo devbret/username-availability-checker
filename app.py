@@ -49,36 +49,51 @@ def check_username(username):
 
     return {'username': username, 'results': results}
 
+def load_existing_data(filepath):
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as file:
+            try:
+                return json.load(file)
+            except json.JSONDecodeError:
+                return []
+    return []
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    json_path = os.path.join('static', 'username_availability.json')
+    existing_data = load_existing_data(json_path)
+    most_recent = existing_data[-1]['username'] if existing_data else None
+
+    return render_template('index.html', most_recent=most_recent)
+
+@app.route('/saved-data', methods=['GET'])
+def saved_data():
+    json_path = os.path.join('static', 'username_availability.json')
+    if os.path.exists(json_path):
+        data = load_existing_data(json_path)
+        return jsonify(data)
+    else:
+        return jsonify([])
 
 @app.route('/check', methods=['POST'])
 def check():
     try:
         username = request.form['username']
         logging.debug(f'Checking username: {username}')
-        results = check_username(username)
+        new_results = check_username(username)
 
         os.makedirs('static', exist_ok=True)
-        with open('static/username_availability.json', 'w') as json_file:
-            json.dump(results, json_file, indent=4)
+        json_path = os.path.join('static', 'username_availability.json')
+        existing_data = load_existing_data(json_path)
 
-        return jsonify(results)
+        existing_data.append(new_results)
+
+        with open(json_path, 'w') as json_file:
+            json.dump(existing_data, json_file, indent=4)
+
+        return jsonify(new_results)
     except Exception as e:
         logging.error('Error checking username:', exc_info=e)
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/saved-data', methods=['GET'])
-def saved_data():
-    try:
-        json_path = os.path.join('static', 'username_availability.json')
-        if os.path.exists(json_path):
-            return send_from_directory('static', 'username_availability.json')
-        else:
-            return jsonify({'error': 'No saved data found'}), 404
-    except Exception as e:
-        logging.error('Error fetching saved data:', exc_info=e)
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":

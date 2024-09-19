@@ -68,13 +68,38 @@
                 margin-bottom: 20px;
                 color: #444;
             }
+            #all-previous-usernames {
+                width: 300px;
+                padding: 15px;
+                font-size: 1.1rem;
+                border: 1px solid #ccc;
+                border-radius: 25px;
+                outline: none;
+                background-color: #fff;
+                transition: border-color 0.3s ease;
+                appearance: none;
+                background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%234a90e2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+                background-repeat: no-repeat;
+                background-position: right 10px center;
+                background-size: 16px;
+                margin-bottom: 50px;
+            }
+
+            #all-previous-usernames:focus {
+                border-color: #4a90e2;
+            }
+
+            #all-previous-usernames option {
+                font-size: 1.1rem;
+            }
+
             svg {
                 background-color: white;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
                 border-radius: 10px;
                 padding: 20px;
                 margin-top: 20px;
-                margin-bottom: 100px;
+                margin-bottom: 50px;
             }
             .bar {
                 fill: #4a90e2;
@@ -125,9 +150,9 @@
         </form>
         <p id="username-display"></p>
         <svg width="1500" height="500"></svg>
+        <select id="all-previous-usernames"></select>
         <script src="https://d3js.org/d3.v6.min.js"></script>
         <script>
-            // Function to update the chart
             function updateChart(data) {
                 const svg = d3.select('svg');
                 const margin = { top: 20, right: 30, bottom: 40, left: 40 };
@@ -178,9 +203,20 @@
                     });
             }
 
-            // Function to load the JSON file if available
+            function populateUsernameDropdown(usernames) {
+                const selectElement = document.getElementById('all-previous-usernames');
+                selectElement.innerHTML = '';
+
+                usernames.forEach((entry) => {
+                    const option = document.createElement('option');
+                    option.value = entry.username;
+                    option.textContent = entry.username;
+                    selectElement.appendChild(option);
+                });
+            }
+
             function loadSavedData() {
-                fetch('/saved-data') // Endpoint to fetch saved JSON data
+                fetch('/saved-data')
                     .then((response) => {
                         if (!response.ok) {
                             throw new Error('No saved data found.');
@@ -188,29 +224,37 @@
                         return response.json();
                     })
                     .then((jsonData) => {
-                        const username = jsonData.username;
-                        const results = jsonData.results;
+                        if (Array.isArray(jsonData) && jsonData.length > 0) {
+                            const mostRecentEntry = jsonData[jsonData.length - 1];
+                            const allUsernames = jsonData.map((entry) => entry);
 
-                        document.getElementById('username-display').textContent = `Results for "${username}"`;
+                            populateUsernameDropdown(allUsernames);
 
-                        const formattedData = Object.keys(results).map((site) => ({
-                            site,
-                            status: results[site].status,
-                            url: results[site].url,
-                            value: 1,
-                        }));
+                            if (mostRecentEntry) {
+                                const username = mostRecentEntry.username;
+                                const results = mostRecentEntry.results;
 
-                        updateChart(formattedData);
+                                document.getElementById('username-display').textContent = `Most recent username checked: "${username}"`;
+
+                                const formattedData = Object.keys(results).map((site) => ({
+                                    site,
+                                    status: results[site].status,
+                                    url: results[site].url,
+                                    value: 1,
+                                }));
+
+                                updateChart(formattedData);
+                            }
+                        }
                     })
                     .catch((error) => {
                         console.log('No saved data found:', error);
+                        document.getElementById('username-display').textContent = 'No recent username checks.';
                     });
             }
 
-            // Load saved data on page load
             window.addEventListener('load', loadSavedData);
 
-            // Handle form submission for checking username availability
             document.getElementById('username-form').addEventListener('submit', function (event) {
                 event.preventDefault();
                 const username = document.getElementById('username').value;
@@ -247,6 +291,33 @@
                         updateChart(formattedData);
                     })
                     .catch((error) => console.error('Error fetching JSON:', error));
+            });
+
+            document.getElementById('all-previous-usernames').addEventListener('change', function (event) {
+                const selectedUsername = event.target.value;
+
+                fetch('/saved-data')
+                    .then((response) => response.json())
+                    .then((jsonData) => {
+                        const selectedEntry = jsonData.find((entry) => entry.username === selectedUsername);
+
+                        if (selectedEntry) {
+                            const username = selectedEntry.username;
+                            const results = selectedEntry.results;
+
+                            document.getElementById('username-display').textContent = `Results for "${username}"`;
+
+                            const formattedData = Object.keys(results).map((site) => ({
+                                site,
+                                status: results[site].status,
+                                url: results[site].url,
+                                value: 1,
+                            }));
+
+                            updateChart(formattedData);
+                        }
+                    })
+                    .catch((error) => console.error('Error fetching saved data:', error));
             });
         </script>
     </body>

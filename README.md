@@ -1,6 +1,6 @@
 # Username Availability Checker
 
-![Username availability results for a demo username.](https://hosting.photobucket.com/images/i/bernhoftbret/username-availability-checker-2-frontpage-updated.png)
+![Username availability results for a demo username.](https://hosting.photobucket.com/images/i/bernhoftbret/usename-availability-checker-new-dropdown.png)
 
 Check the availability of a username across twenty popular platforms.
 
@@ -21,3 +21,4 @@ Check the availability of a username across twenty popular platforms.
 6. Run the script with the command `python3 app.py`. After the Flask server has started, visit [this link](http://127.0.0.1:5000/) in a browser, and you will be brought to the live application.
 7. Enter the username you wish to search for, then click the "Check" button. Your results will be returned to you momentarily.
 8. If a username is taken on a given platform, then by clicking "taken", the relevant profile is opened in a new tab.
+9. You will also notice a dropdown select element toward the bottom of the application. Here you can access data from all of your prior searches.
