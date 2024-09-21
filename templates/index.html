@@ -145,7 +145,7 @@
         <h1>Username Availability Checker</h1>
         <p>Check the availability of a username across twenty popular platforms.</p>
         <form id="username-form">
-            <input type="text" id="username" name="username" placeholder="Enter username" required />
+            <input type="text" id="username" name="username" placeholder="Enter username..." required />
             <button type="submit">Check</button>
         </form>
         <p id="username-display"></p>
@@ -207,6 +207,11 @@
                 const selectElement = document.getElementById('all-previous-usernames');
                 selectElement.innerHTML = '';
 
+                const defaultOption = document.createElement('option');
+                defaultOption.value = 'none';
+                defaultOption.textContent = 'Select previous search...';
+                selectElement.appendChild(defaultOption);
+
                 usernames.forEach((entry) => {
                     const option = document.createElement('option');
                     option.value = entry.username;
@@ -255,11 +260,11 @@
 
             window.addEventListener('load', loadSavedData);
 
-            document.getElementById('username-form').addEventListener('submit', function (event) {
+            document.getElementById('username-form').addEventListener('submit', async function (event) {
                 event.preventDefault();
                 const username = document.getElementById('username').value;
 
-                fetch('/check', {
+                await fetch('/check', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
