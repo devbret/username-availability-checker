@@ -2,7 +2,7 @@
 
 ![Username availability results for a demo username.](https://hosting.photobucket.com/images/i/bernhoftbret/usename-availability-checker-new-dropdown.png)
 
-Check the availability of a username across twenty popular platforms.
+Check the availability of a username across twenty popular social media platforms.
 
 ## Set Up
 
