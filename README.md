@@ -15,7 +15,7 @@ Check the availability of a username across twenty popular social media platform
 
 1. Install the above programs.
 2. Open a shell window (For Windows open PowerShell, for MacOS open Terminal & for Linux open your distro's terminal emulator).
-3. Clone this repository using `git` by running the following command; `git clone https://github.com/devbret/username-availability-checker`.
+3. Clone this repository using `git` by running the following command; `git clone git@github.com:devbret/username-availability-checker.git`.
 4. Navigate to the repo's directory by running; `cd username-availability-checker`.
 5. Install the needed dependencies for running the script by running; `pip install -r requirements.txt`.
 6. Run the script with the command `python3 app.py`. After the Flask server has started, visit [this link](http://127.0.0.1:5000/) in a browser, and you will be brought to the live application.
