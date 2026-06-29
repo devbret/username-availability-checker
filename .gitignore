@@ -1,3 +1,4 @@
+__pycache__/
 venv/
 static/username_availability.json
 .vscode/

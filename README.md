@@ -1,14 +1,14 @@
 # Username Availability Checker
 
-![Username availability results for a demo username.](https://hosting.photobucket.com/bbcfb0d4-be20-44a0-94dc-65bff8947cf2/b7638cad-0d3f-410e-b259-d82c247f521a.png)
+![Username availability results for a demo username.](https://hosting.photobucket.com/bbcfb0d4-be20-44a0-94dc-65bff8947cf2/cbbd5e4d-2a95-4d90-a54a-7b6e1496479e.png)
 
-Check a username’s availability across twenty major platforms, automatically save each search and visualize the results with an interactive bar chart.
+Check a username’s availability across one hundred major platforms, automatically save each search and visualize the results with an interactive UI.
 
-## Overview
+## Application Overview
 
-Checks whether a given username is available or taken across twenty popular online platforms by sending HTTP requests to each site’s profile URL pattern, then stores each search result in a JSON file for persistence. The frontend, built with HTML, JavaScript and D3.js, visualizes the results as a color-coded bar chart indicating availability status, allows users to click through to taken profiles and provides a dropdown menu to revisit and re-display previously searched usernames.
+Checks whether a given username is available or taken across one hundred popular online platforms by sending HTTP requests to each site’s profile URL pattern, then stores each search result in a JSON file for persistence. The frontend (built with HTML, JavaScript and D3.js) visualizes the results as color-coded cards indicating availability status, allowing users to click through to taken profiles and providing a dropdown menu to revisit and re-display previously searched usernames.
 
-## Set Up Instructions
+## Basic Setup Instructions
 
 Below are the required software programs and set up steps for running this application on a Linux machine.
 
@@ -24,7 +24,7 @@ Below are the required software programs and set up steps for running this appli
 
 2. Open a terminal
 
-3. Clone this repository using `git` by running the following command: `git clone git@github.com:devbret/username-availability-checker.git`
+3. Clone this repository: `git clone git@github.com:devbret/username-availability-checker.git`
 
 4. Navigate to the repo's directory: `cd username-availability-checker`
 
@@ -32,28 +32,24 @@ Below are the required software programs and set up steps for running this appli
 
 6. Activate your virtual environment: `source venv/bin/activate`
 
-7. Install the needed dependencies for running the Python script: `pip install -r requirements.txt`
+7. Install the needed dependencies: `pip install -r requirements.txt`
 
 8. Run the script: `python3 app.py`
 
-9. Visit the following URL after the Flask server has started to view the frontend: `http://127.0.0.1:5000/`
+9. Visit the frontend in a browser: `http://127.0.0.1:5000/`
 
-10. Enter a username you wish to search for, then click the `Check` button and wait for your results
-
-11. If a username is taken on a given platform and after clicking "taken", the relevant profile is opened in a new browser tab
-
-12. Notice a dropdown select element toward the bottom of the application where you can access data from all of your prior searches
-
-13. Exit the virtual environment when finished: `deactivate`
+10. Exit the virtual environment when finished: `deactivate`
 
 ## Other Considerations
 
 This project repo is intended to demonstrate an ability to do the following:
 
-- Check a given username across multiple popular platforms to determine whether it is available, taken or uncertain
+- Check whether a given username is available or already taken across 100 major online platforms
 
-- Store each username search and its results in a JSON file, allowing users to revisit and compare previous checks
+- Classify each result as available, taken or unsure based on the HTTP status code returned
 
-- Visualize the availability results in an interactive D3.js bar chart, with clickable links to profiles when usernames are already taken
+- Persist every search and its results in a JSON file so past lookups can be revisited and compared later
+
+- Serve a Flask web frontend to visualize the results as a color-coded, interactive UI with clickable links to profiles already taken
 
 If you have any questions or would like to collaborate, please reach out either on GitHub or via [my website](https://bretbernhoft.com/).
