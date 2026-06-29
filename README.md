@@ -1,8 +1,8 @@
 # Username Availability Checker
 
-![Username availability results for a demo username.](https://hosting.photobucket.com/bbcfb0d4-be20-44a0-94dc-65bff8947cf2/b7638cad-0d3f-410e-b259-d82c247f521a.png)
+![Username availability results for a demo username.](https://hosting.photobucket.com/bbcfb0d4-be20-44a0-94dc-65bff8947cf2/cbbd5e4d-2a95-4d90-a54a-7b6e1496479e.png)
 
-Check a username’s availability across twenty major platforms, automatically save each search and visualize the results with an interactive bar chart.
+Check a username’s availability across one hundred major platforms, automatically save each search and visualize the results with an interactive bar chart.
 
 ## Overview
 
