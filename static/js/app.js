@@ -141,7 +141,7 @@ function normalizeStatus(raw) {
   const s = String(raw).toLowerCase();
   if (s === "available") return "available";
   if (s === "taken") return "taken";
-  if (s.includes("error")) return "error";
+  if (s.includes("error") || s === "unreachable") return "error";
   return "unsure";
 }
 
