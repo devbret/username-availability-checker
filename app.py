@@ -149,7 +149,8 @@ def check_site(site, url_pattern, username):
         else:
             return site, {'status': 'unsure', 'url': None}
     except requests.exceptions.RequestException as e:
-        return site, {'status': f'error: {e}', 'url': None}
+        logging.debug('Request to %s failed: %s', site, e)
+        return site, {'status': 'unreachable', 'url': None}
 
 
 def check_username(username):
